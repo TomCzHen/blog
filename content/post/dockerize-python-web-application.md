@@ -482,7 +482,7 @@ WORKDIR /caddy
 RUN mkdir -p "etc" "www" "logs"
 VOLUME ["/caddy"]
 EXPOSE 80 443 2015
-CMD ["caddy","-agree","-conf","etc/Caddyfile"]
+CMD ["caddy","-agree","-conf","etc/Caddyfile","--log","stdout"]
 ```
 
 * Caddyfile
