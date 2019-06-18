@@ -14,7 +14,9 @@ tags:
 
 <!--more-->
 
-> TL;DR: 一个可用样例项目 [TomCzHen/Dockerize-Python-Web-Application](https://github.com/TomCzHen/Dockerize-Python-Web-Application)
+> TL;DR
+> 
+> 样例项目：[TomCzHen/Dockerize-Python-Web-Application](https://github.com/TomCzHen/Dockerize-Python-Web-Application)
 
 典型的 Python Web (Flask) 项目的文件结构大致是这样的：
 
