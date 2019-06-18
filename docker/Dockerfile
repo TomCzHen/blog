@@ -39,4 +39,4 @@ VOLUME ["/root/caddy"]
 EXPOSE 80 443
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["caddy","-agree","-conf","/etc/caddy/Caddyfile"]
+CMD ["caddy","-agree","-conf","/etc/caddy/Caddyfile","--log","stdout"]
