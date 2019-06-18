@@ -149,6 +149,7 @@ ARG tag="1.0.0"
 ARG ssh_key=""
 RUN apt-get update && apt-get install -yqq git \
     && echo ${ssh_key} > ~/.ssh/id.rsa \
+    && chmod 700 ~/.ssh/id_rsa \
     && git clone --depth=1 -b ${tag} ssh://github.com/example/flask-example.git /app \
     && rm -rf app/.git
 
@@ -162,6 +163,8 @@ WORKDIR /app
 RUN pip install pipenv && pipenv install --deploy --system
 CMD ["flask","run"]
 ```
+
+无论采取何种方式，如果想确保每次构建获取的都是最新的代码，要么使用 `--no-cache` 参数，要么在获取代码前引入参数变化。
 
 #### 优化结构
 
@@ -580,7 +583,9 @@ volumes:
   caddy-data:
 ```
 
-通过加载 .env 文件对容器进行配置，需要注意，开发环境下如果使用了 pipenv 也会自动加载 .env 配置为环境变量。
+通过加载 `.env` 文件对容器进行配置，需要注意，开发环境下如果使用了 pipenv ，激活虚拟环境时也会自动加载 `.env` 配置环境变量。
+
+注意：docker-compose 自动加载 `.env` 文件只对 `docker-compose.yaml` 内容产生影响，并不会传入容器内部，可以使用 `docker-compose config` 查看完整内容。如果想加载到容器内部，要么使用 `env_file` 加载，要么在 `environment` 再指定一次变量。
 
 ```shell
 # .env
@@ -603,7 +608,7 @@ UWSGI_WORKERS=4
 UWSGI_THREADS=2
 ```
 
-这样只需要编排文件，加上 .env 配置，就能在不同环境下运行了。如果情况允许，可以通过将 Caddyfile 添加到 Caddy 镜像中，并通过 Caddy 支持的变量方式来配置。
+这样只需要编排文件，加上 .env 配置，就能在不同配置下运行了。如果情况允许，可以通过将 Caddyfile 添加到 Caddy 镜像中，并通过 Caddy 支持的变量方式来配置。
 
 ```
 {$CADDY_DOMAIN} {
