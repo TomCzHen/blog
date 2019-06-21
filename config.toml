@@ -5,7 +5,6 @@ title = "Tom CzHen's Blog"
 theme = "beautifulhugo"
 enableEmoji = true
 disqusShortname = "tomczhen"
-googleAnalytics = "UA-42719299-2"
 
 [Params]
     logo = "images/avatar.webp"
