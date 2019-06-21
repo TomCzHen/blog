@@ -124,6 +124,7 @@ curl -s http://ip.taobao.com/service/getIpInfo.php?ip=myip | jq '.data.ip'
 以 Python 为例获取 ip 的值：
 
 * Python 2
+
 ```shell
 export PYTHONIOENCODING=utf8
 curl -s 'http://ip.taobao.com/service/getIpInfo.php?ip=myip' | \
@@ -131,6 +132,7 @@ curl -s 'http://ip.taobao.com/service/getIpInfo.php?ip=myip' | \
 ```
 
 * Python 3
+
 ```shell
 curl -s 'http://ip.taobao.com/service/getIpInfo.php?ip=myip' | \
     python3 -c "import sys, json; print(json.load(sys.stdin)['data']['ip'])"
