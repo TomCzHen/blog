@@ -8,7 +8,7 @@ disqusShortname = "tomczhen"
 
 [Params]
     logo = "images/avatar.webp"
-    # subtitle = "Build a beautiful and simple website in minutes"
+    subtitle = "Talk is cheap. Show me the code."
     favicon = "images/avatar.webp"
     since = 2014
     useHLJS = true
