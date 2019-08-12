@@ -31,7 +31,7 @@ public class HelloWorld {
 }
 ```
 
-然后分别使用 javac 与 EJC 进行编译。
+然后分别使用 javac 与 ECJ 进行编译。
 
 ```bash
 java -jar ecj-4.11.jar HelloWorld.java
@@ -43,7 +43,7 @@ javac HelloWorld.java
 
 如果没有使用环境变量 JAVA_TOOL_OPTIONS 配置默认编码的话，使用 javac 编译时会提示编码错误，然后通过添加 `-encoding GB18030` 参数即可编译成功。
 
-对代码文件编码的自动处理只是 ECJ 与 javac 的差异之一，因此存在 EJC 可以编译的代码使用 javac 无法编译的情况。
+对代码文件编码的自动处理只是 ECJ 与 javac 的差异之一，因此存在 ECJ 可以编译的代码使用 javac 无法编译的情况。
 
 ### 解决
 
