@@ -112,7 +112,7 @@ $ echo "deb [arch=armhf] https://download.docker.com/linux/debian \
 
     ```
     {
-      "registry-mirrors": ["https://registry.docker-cn.com"]
+      "registry-mirrors": ["https://mirror.ccs.tencentyun.com"]
     }
     ```
 
@@ -122,9 +122,9 @@ $ echo "deb [arch=armhf] https://download.docker.com/linux/debian \
     $ sudo systemctl restart docker
     ```
 
-上面的镜像地址是由 [Docker 中国](https://www.docker-cn.com/)官方提供的，可以在[中文网站](https://www.docker-cn.com/)上查看一些其他关于 Docker 的资料。
+~~上面的镜像地址是由 [Docker 中国](https://www.docker-cn.com/)官方提供的，可以在[中文网站](https://www.docker-cn.com/)上查看一些其他关于 Docker 的资料。需要注意的是虽然有提供中文文档，不过截至本文发布时，大部分内容仍然是英文，而且内容还有滞后，所以还是看英文文档吧。~~
 
-需要注意的是虽然有提供中文文档，不过截至本文发布时，大部分内容仍然是英文，而且内容还有滞后，所以还是看英文文档吧。
+注：截止到 2019年11月 6日 https://www.docker-cn.com 提供的 DockerHub 加速镜像已经无法访问。
 
 重启 Docker 之后，可以查看一下是否配置成功
 
@@ -137,7 +137,7 @@ $ sudo docker info
 ```
 ...
 Registry Mirrors:
- https://registry.docker-cn.com/
+ https://mirror.ccs.tencentyun.com/
 ...
 ```
 
