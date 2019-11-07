@@ -215,6 +215,6 @@ include /etc/nginx/mime.types;
 default_type application/octet-stream;
 ```
 
-HTTP 客户端——通常是浏览器，会根据 `Content-Type` 响应头对响应内容进行处理，比如 `text/html` 则会作为 HTML 内容进行渲染。
+HTTP 客户端——通常是浏览器，会根据 `Content-Type` 响应头对响应内容进行处理，比如 `text/html` 则会作为 HTML 内容进行渲染，但最终如何操作还与系统设置有关，比如 PDF 类型文件如果关联了 Chrome 浏览器，则会直接打开。
 
 `mime.types` 中保存了不同资源类型对应的 `Content-Type` 响应值，如果没有对应的资源类型，则取 `default_type` 指令中配置的值。
