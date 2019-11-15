@@ -197,7 +197,7 @@ http {
 
 NGINX 配置由指令与参数组成，对于单行指令每行都会以 `;` 作为结尾。包含内容的指令则使用 `{}` 包含其他指令，通常都会按不同功能划分为各个块进行配置。
 
-#### main context
+#### main Context
 
 > 文档: [NGINX - Core functionality](https://nginx.org/en/docs/ngx_core_module.html)
 
@@ -210,10 +210,10 @@ NGINX 配置由指令与参数组成，对于单行指令每行都会以 `;` 作
 
 ##### `deamon`
 
->Syntax: daemon on | off;
+>Syntax: daemon on | off;  
 Default: daemon on;
 
-以守护进程运行 NGINX。
+配置是否以守护进程运行 NGINX，通常只会在开发环境下使用。
 
 ##### `env`
 
@@ -259,11 +259,6 @@ include /etc/nginx/conf.d/*.conf;
 ```
 load_module modules/ngx_mail_module.so;
 ```
-
-##### `lock_file`
-
->Syntax: lock_file *file*;  
-Default: lock_file logs/nginx.lock;
 
 ##### `master_process`
 
@@ -357,20 +352,34 @@ Default: worker_processes 1;
 
 定义 worker 进程的数量。
 
-决定最佳值的因素很多，包括 CPU 核心数、存储性能等等。通常会设置为 CPU 核心数一致，或者使用 `auto`，NGINX 会检测可用的 CPU 核心数并自动配置。
+决定最佳值的因素很多，包括 CPU 逻辑核心数、存储等等。通常会设置为 CPU 核心数一致，或者使用 `auto`，NGINX 会检测可用的 CPU 核心数并自动配置。
 
 ##### `worker_rlimit_core`
 
 >Syntax: worker_rlimit_core *size*;
 
-可以在线（不重启 main 进程）调整 worker 进程生产的 dump core 文件大小。
+可以不重启 main 进程调整 worker 进程生产的 dump core 文件大小。
 
 dump core 可用于调试，相关信息可以查看 [Core dump - ArchWiki](https://wiki.archlinux.org/index.php/Core_dump)。
+
 ##### `worker_rlimit_nofile`
 
 >Syntax: worker_rlimit_nofile *number*;
 
 调整 worker 进程打开文件的最大限制，没有配置时使用内核的限制。
+
+`worker_rlimit_nofile` 还受到系统参数限制，可以通过 `ulimit -Sn` 与 `ulimit -Hn` 命令查看。可以通过 `cat /proc/$(cat logs/nginx.pid)/limits` 查看 NGINX 当前使用的受限资源。
+
+>参考:  
+> * [通过 ulimit 改善系统性能](https://www.ibm.com/developerworks/cn/linux/l-cn-ulimit/index.html)
+> * [Is it safe to increase operating system ulimits?](https://www.ibm.com/support/pages/it-safe-increase-operating-system-ulimits)
+
+针对 NGINX 可以使用两种方式来调整 `ulimit` 限制：
+
+* 通过 `/etc/security/limits.conf` 文件配置
+* 通过在 systemctl 配置文件中添加 `LimitNOFILE=65536` 进行配置
+
+此外，`fs.file-max` `fs.file-nr` 内核参数也会影响到打开的文件句柄数量，不过通常这个值是足够大的。
 
 ##### `worker_shutdown_timeout`
 
@@ -385,3 +394,61 @@ dump core 可用于调试，相关信息可以查看 [Core dump - ArchWiki](http
 >Syntax: working_directory directory;
 
 定义 worker 进程的当前工作路径。通常用于写入 dunmp core 文件，worker 进程需要有写入权限。
+
+#### event Context
+
+##### `accept_mutex`
+
+>Syntax: accept_mutex on | off;  
+Default: accept_mutex off;
+
+启用 `accept_mutex` 命令时，worker 进程会轮流处理新连接，未启用时，则由所有 worker 进程来争抢新连接。
+
+`accept_mutex` 用意是解决[惊群问题](https://zh.wikipedia.org/zh-hans/%E6%83%8A%E7%BE%A4%E9%97%AE%E9%A2%98),因此在 `1.11.3` 之前的版本中，该命令是默认开启的。
+
+Linux 4.5, glibc 2.24 增加了 `EPOLLEXCLUSIVE` 在内核 epoll 中解决了这个问题，因此在 `1.11.3` 版本之后，`accept_mutex` 默认是关闭的。另外，当使用了 `reuseport` 参数时，该选项也无需开启。
+
+注意：一些企业发行版比如 SuSE 和 RedHat 会将高版本内核特性 backport 到内核中，内核版本低于 4.5 时也可能支持。
+
+##### `accept_mutex_delay`
+
+>Syntax: accept_mutex_delay *time*;  
+Default: accept_mutex_delay 500ms;
+
+在启用 `accept_mutex` 时，可以通过 `accept_mutex_delay` 配置 worker 进程获取新连接的间隔时间。
+
+##### `multi_accept`
+
+>Syntax: multi_accept on | off;  
+Default: multi_accept off;
+
+启用 `multi_accept` 时 worker 进程会一次尽量多的接受连接，否则一次接受一条新连接。此外，如果一次接受的连接数比 `worker_connections` 设置得少，会产生错误。
+
+官方推荐是配置为关闭，除非确定开启会有帮助。
+
+*云推测：如果是小请求，在负载合理的前提下，开启应该对缩短响应速度是有帮助的，但是大请求则未必。*
+
+##### `use`
+
+>Syntax: use *method*;
+
+一般情况下不需要指定，NGINX 默认会使用最佳的值，在 Linux 上通常是 epoll，BSD 平台则是 kqueue。
+
+##### `worker_aio_requests`
+
+>Syntax: worker_aio_requests *number*;  
+Default: worker_aio_requests 32;
+
+指定每个 worker 线程可使用 (aio)异步 IO 操作数量。
+
+>参考:  
+>[Boost application performance using asynchronous I/O - IBM](https://developer.ibm.com/articles/l-async/#system-tuning-for-aio)
+
+##### `worker_connections`
+
+>Syntax: worker_connections *number*;  
+Default: worker_connections 512;
+
+设置单个 worker 进程可以同时打开的最大连接数量。
+
+这个连接数量不仅仅是指与客户端的连接，而是包括代理连接等。另外，`worker_connections` 实际可用值还受 `worker_rlimit_nofile` 限制，需要保证 `worker_processes` * `worker_connections` 小于或等于 ulimit 中配置的可用文件句柄数。
