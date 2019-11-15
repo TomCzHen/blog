@@ -25,7 +25,7 @@ Windows 平台下 IIS 由于使用了 IOCP 异步机制，并且 `http.sys` 处�
 
 > [NGINX: Building NGINX from Sources](http://nginx.org/en/docs/configure.html)
 
-nginx 开源版本源码可以从 [NGINX: download](https://nginx.org/en/download.html) 下载。
+NGINX 开源版本源码可以从 [NGINX: download](https://nginx.org/en/download.html) 下载。
 
 需要注意发行版仓库中分发的版本编译参数与 Module 可能会与源码版本中默认配置不一样，不能视为一致。
 
@@ -116,8 +116,7 @@ nginx -tq && nginx -s reload || echo "invalid config"
 ### 配置文件
 
 > 参考：  
-> [How to Configure NGINX](https://www.linode.com/docs/web-servers/nginx/how-to-configure-nginx/)  
-> [Core functionality - NGINX](http://nginx.org/en/docs/ngx_core_module.html)
+> * [How to Configure NGINX](https://www.linode.com/docs/web-servers/nginx/how-to-configure-nginx/)  
 
 
 默认主配置文件可以通过 `nginx -V` 中显示的 `--conf-path` 参数可以获取，通过 `systemctl status nginx` 可以查看是否指定了配置文件路径。
@@ -199,7 +198,8 @@ NGINX 配置由指令与参数组成，对于单行指令每行都会以 `;` 作
 
 #### main Context
 
-> 文档: [NGINX - Core functionality](https://nginx.org/en/docs/ngx_core_module.html)
+> 参考:  
+> * [NGINX - Core functionality](https://nginx.org/en/docs/ngx_core_module.html)
 
 `main` context 可以包含以下 block:
 
@@ -222,8 +222,8 @@ Default: env TZ;
 
 默认情况下，NGINX 父进程会移除 `TZ` 之外的环境变量。通过 `env` 指令可以定义保留的环境变量或者修改变量值、创建新的变量。
 
-> 参考: [TZ Variable (The GNU C Library)](https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html)  
-> In POSIX systems, a user can specify the time zone by means of the TZ environment variable. 
+> 参考:  
+> * [TZ Variable (The GNU C Library)](https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html)
 
 使用示例：
 
@@ -295,7 +295,8 @@ Default: thread_pool default threads=32 max_queue=65536;
 
 定义线程池名称，大小，线程队列长度，在使用非阻塞模式时可以通过 `aio` 等指令来进行配置，解决无法缓存到内存时产生的 IO 阻塞带来的性能问题。
 
-参考：[Thread Pools in NGINX Boost Performance 9x!](https://www.nginx.com/blog/thread-pools-boost-performance-9x/)
+> 参考：  
+> * [Thread Pools in NGINX Boost Performance 9x!](https://www.nginx.com/blog/thread-pools-boost-performance-9x/)
 
 ##### `timer_resolution`
 
@@ -371,7 +372,7 @@ dump core 可用于调试，相关信息可以查看 [Core dump - ArchWiki](http
 `worker_rlimit_nofile` 还受到系统参数限制，可以通过 `ulimit -Sn` 与 `ulimit -Hn` 命令查看。可以通过 `cat /proc/$(cat logs/nginx.pid)/limits` 查看 NGINX 当前使用的受限资源。
 
 >参考:  
-> * [通过 ulimit 改善系统性能](https://www.ibm.com/developerworks/cn/linux/l-cn-ulimit/index.html)
+> * [通过 ulimit 改善系统性能](https://www.ibm.com/developerworks/cn/linux/l-cn-ulimit/index.html)  
 > * [Is it safe to increase operating system ulimits?](https://www.ibm.com/support/pages/it-safe-increase-operating-system-ulimits)
 
 针对 NGINX 可以使用两种方式来调整 `ulimit` 限制：
@@ -442,7 +443,7 @@ Default: worker_aio_requests 32;
 指定每个 worker 线程可使用 (aio)异步 IO 操作数量。
 
 >参考:  
->[Boost application performance using asynchronous I/O - IBM](https://developer.ibm.com/articles/l-async/#system-tuning-for-aio)
+>* [Boost application performance using asynchronous I/O - IBM](https://developer.ibm.com/articles/l-async/#system-tuning-for-aio)
 
 ##### `worker_connections`
 
