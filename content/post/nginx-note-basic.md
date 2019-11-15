@@ -9,7 +9,11 @@ tags:
 
 NGINX (engine x) 可以用作 HTTP 服务、反向代理、邮件代理和 TCP/UDP 代理，NGINX 有开源版本以及商业支持的 Plus 版本，在高并发场景下，具有高性能、低资源的优点。
 
+NGINX 使用 C 语言开发，在 Linux 平台使用 epoll、BSD 平台使用的 kqueue 异步机制。需要注意的是 Windows 平台虽然有 IOCP 异步 API，但 NGINX 在 Windows 平台使用的是阻塞 IO 模型 select，因此在 Windows 平台 NGINX 性能上无法参照 Linux/BSD 平台，除此之外 NGINX 还针对 Linux/BSD 平台有着 IO 优化，这些也会对性能提高有着帮助。
+
 <!--more-->
+
+Windows 平台下 IIS 由于使用了 IOCP 异步机制，并且 `http.sys` 处于内核态运行，理论没有第三方 Web Server 能在 Windows 上性能超过 IIS。并且，IIS 可以通过 Application Request Routing （ARR）功能模块来实现负载均衡、反向代理等功能。
 
 ## 安装
 
@@ -17,7 +21,7 @@ NGINX (engine x) 可以用作 HTTP 服务、反向代理、邮件代理和 TCP/U
 
 > [NGINX: Linux packages](http://nginx.org/en/linux_packages.html)
 
-二进制包的源码可以从 [http://hg.nginx.org/pkg-oss](http://hg.nginx.org/pkg-oss) 获取，选择需要的版本，并下载 zip 或 gz 包即可。
+二进制包的源码可以从 [http://hg.nginx.org/pkg-oss](http://hg.nginx.org/pkg-oss) 获取，选择需要的版本，并下载 zip 或 gz 压缩包即可。
 
 > [NGINX: Building NGINX from Sources](http://nginx.org/en/docs/configure.html)
 
@@ -111,6 +115,11 @@ nginx -tq && nginx -s reload || echo "invalid config"
 
 ### 配置文件
 
+> 参考：  
+> [How to Configure NGINX](https://www.linode.com/docs/web-servers/nginx/how-to-configure-nginx/)  
+> [Core functionality - NGINX](http://nginx.org/en/docs/ngx_core_module.html)
+
+
 默认主配置文件可以通过 `nginx -V` 中显示的 `--conf-path` 参数可以获取，通过 `systemctl status nginx` 可以查看是否指定了配置文件路径。
 
 另外，可以通过一些在线工具网站来生成配置文件，比如 [NGINX Config.io](https://nginxconfig.io/) 和 [Mozilla SSL Configuration Generator](https://ssl-config.mozilla.org/)。
@@ -188,33 +197,191 @@ http {
 
 NGINX 配置由指令与参数组成，对于单行指令每行都会以 `;` 作为结尾。包含内容的指令则使用 `{}` 包含其他指令，通常都会按不同功能划分为各个块进行配置。
 
-为了便于维护配置文件，按不同功能模块来划分配置文件，然后使用 `include` 指令引入配置文件，。
-```
-user             nobody;
-error_log        logs/error.log notice;
-worker_processes 1;
-include /etc/nginx/conf.d/http.conf;
-include /etc/nginx/conf.d/stream.conf;
-```
+#### main context
 
-以下指令则必须包含有上下文：
+> 文档: [NGINX - Core functionality](https://nginx.org/en/docs/ngx_core_module.html)
+
+`main` context 可以包含以下 block:
 
 * events – General connection processing
 * http – HTTP traffic
 * mail – Mail traffic
 * stream – TCP and UDP traffic
 
-在这些指令之外的内容都被称为 main context。
+##### `deamon`
 
-#### MIME Type
+>Syntax: daemon on | off;
+Default: daemon on;
 
-在默认配置文件中可以看到有这样的段对 mime 进行配置：
+以守护进程运行 NGINX。
+
+##### `env`
+
+>Syntax: env variable[=value];  
+Default: env TZ;
+
+默认情况下，NGINX 父进程会移除 `TZ` 之外的环境变量。通过 `env` 指令可以定义保留的环境变量或者修改变量值、创建新的变量。
+
+> 参考: [TZ Variable (The GNU C Library)](https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html)  
+> In POSIX systems, a user can specify the time zone by means of the TZ environment variable. 
+
+使用示例：
+
+```
+env MALLOC_OPTIONS;
+env PERL5LIB=/data/site/modules;
+env OPENSSL_ALLOW_PROXY_CERTS=1;
+```
+
+注意：NGINX 内部环境变量无法由用户设置值。
+
+#### `include`
+
+>Syntax: include *file* | *mask*;
+
+`include` 用于引入其他配置文件，可以在任意 context 中使用。
+
+比如：
 
 ```
 include /etc/nginx/mime.types;
-default_type application/octet-stream;
+include /etc/nginx/conf.d/*.conf;
 ```
 
-HTTP 客户端——通常是浏览器，会根据 `Content-Type` 响应头对响应内容进行处理，比如 `text/html` 则会作为 HTML 内容进行渲染，但最终如何操作还与系统设置有关，比如 PDF 类型文件如果关联了 Chrome 浏览器，则会直接打开。
+为了便于维护配置文件，可以按不同功能模块来划分配置文件，然后使用 `include` 指令引入配置文件。
 
-`mime.types` 中保存了不同资源类型对应的 `Content-Type` 响应值，如果没有对应的资源类型，则取 `default_type` 指令中配置的值。
+##### `load_module`
+
+加载一个动态模块。
+
+比如：
+
+```
+load_module modules/ngx_mail_module.so;
+```
+
+##### `lock_file`
+
+>Syntax: lock_file *file*;  
+Default: lock_file logs/nginx.lock;
+
+##### `master_process`
+
+> Syntax: master_process on | off;  
+Default: master_process on;
+
+在开发环境中使用 `master_process off` 可以让 NGINX 不开启 master 进程运行，永远不要在生产环境中使用。
+
+##### `pcre_jit`
+
+>Syntax: pcre_jit on | off;  
+Default: pcre_jit off;
+
+定义是否启用 PCRE JIT。开启 PCRE JIT 可以有效提供正则性能，但是需要在编译时使用 `--with-pcre=` `--with-pcre-jit` 参数。
+
+##### `pid`
+
+>Syntax: pid *file*;  
+Default: pid logs/nginx.pid;
+
+定义保存 NGINX 主进程 PID 的文件。
+
+##### `ssl_engine`
+
+>Syntax: ssl_engine *device*;  
+Default: —
+
+定义 SSL 硬件加速器。
+
+##### `thread_pool`
+
+>Syntax: thread_pool *name* threads=*number* [max_queue=*number*];  
+Default: thread_pool default threads=32 max_queue=65536;
+
+定义线程池名称，大小，线程队列长度，在使用非阻塞模式时可以通过 `aio` 等指令来进行配置，解决无法缓存到内存时产生的 IO 阻塞带来的性能问题。
+
+参考：[Thread Pools in NGINX Boost Performance 9x!](https://www.nginx.com/blog/thread-pools-boost-performance-9x/)
+
+##### `timer_resolution`
+
+>Syntax: timer_resolution *interval*;  
+Default: —
+
+NGINX 有自己的时间缓存机制存在，未配置时，由 NGINX 根据指定的内核事件时调用更新时间缓存。为了避免因为缓存造成时间精度问题，可以通过定义 `timer_resolution` 指令来配置更新间隔，例如：`timer_resolution 100ms`。
+
+##### `user`
+
+>Syntax: user user [group];  
+Default: user nobody nobody;
+
+定义 worker 进程所属的用户以及组。
+
+##### `worker_cpu_affinity`
+
+>Syntax: worker_cpu_affinity *cpumask* ...;  
+worker_cpu_affinity auto [*cpumask*];
+
+定义 worker 进程绑定 CPU 核心，通过该配置可以提供多核 CPU 的利用率，有助于提升性能。
+
+`cpumask` 根据 `worker_processes` 和 CPU 逻辑核心数决定，使用二进制数字表示。
+
+使用示例：
+
+```
+worker_processes    4;
+worker_cpu_affinity 0001 0010 0100 1000;
+```
+
+```
+worker_processes    2;
+worker_cpu_affinity 0101 1010;
+```
+
+```
+worker_cpu_affinity auto 01010101;
+```
+
+需要注意的是，使用 Docker 容器运行时，NGINX 获取的是物理主机资源信息，而非容器可用资源，如果确实需要使用 `worker_cpu_affinity` 还需要根据实际情况调整。
+
+##### `worker_priority`
+
+>Syntax: worker_priority *number*;  
+Default: worker_priority 0;
+
+定义 worker 进程调度优先级，`number` 允许的值为 -20 到 20，数字越小，优先级越高。
+
+##### `worker_processes`
+
+>Syntax: worker_processes *number* | auto;  
+Default: worker_processes 1;
+
+定义 worker 进程的数量。
+
+决定最佳值的因素很多，包括 CPU 核心数、存储性能等等。通常会设置为 CPU 核心数一致，或者使用 `auto`，NGINX 会检测可用的 CPU 核心数并自动配置。
+
+##### `worker_rlimit_core`
+
+>Syntax: worker_rlimit_core *size*;
+
+可以在线（不重启 main 进程）调整 worker 进程生产的 dump core 文件大小。
+
+dump core 可用于调试，相关信息可以查看 [Core dump - ArchWiki](https://wiki.archlinux.org/index.php/Core_dump)。
+##### `worker_rlimit_nofile`
+
+>Syntax: worker_rlimit_nofile *number*;
+
+调整 worker 进程打开文件的最大限制，没有配置时使用内核的限制。
+
+##### `worker_shutdown_timeout`
+
+>Syntax: worker_shutdown_timeout *time*;
+
+配置 worker 进程退出超时时间。
+
+正常情况下 worker 进程退出时会进行等待（定时事务、业务逻辑处理）完成，当配置 `worker_shutdown_timeout` 后，到达指定的时间就会强制关闭连接，退出 worker 进程，以释放系统资源。
+
+##### `working_directory`
+
+>Syntax: working_directory directory;
+
+定义 worker 进程的当前工作路径。通常用于写入 dunmp core 文件，worker 进程需要有写入权限。
