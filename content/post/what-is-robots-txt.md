@@ -19,8 +19,8 @@ robots.txt（统一小写）是一种存放于网站根目录下的ASCII编码�
 ## robots.txt 结构
 
 > 参考资料:  
-> * [robots.txt 文件简介](https://support.google.com/webmasters/answer/6062608)
-> * [The Web Robots Pages](https://www.robotstxt.org/)
+> [robots.txt 文件简介](https://support.google.com/webmasters/answer/6062608)  
+> [The Web Robots Pages](https://www.robotstxt.org/)
 
 
 `robots.txt` 需要在网站根路径下可以访问，并且只能是小写，通常是存放一个文本文件命名为 `robots.txt`，例如：`https://www.jd.com/robots.txt`。
@@ -35,7 +35,7 @@ Disallow: /disallow_uri_path
 ### Robots 扩展标准
 
 > 参考资料:  
-> * [Robots exclusion standard](https://en.wikipedia.org/wiki/Robots_exclusion_standard#Nonstandard_extensions)
+> [Robots exclusion standard](https://en.wikipedia.org/wiki/Robots_exclusion_standard#Nonstandard_extensions)
 
 标准的 `robots.txt` 中 `User-agent` 虽然可以使用 `*` 表示所有爬虫，但是不支持通配符或正则（`*` 只是一个特定值），`Disallow` 同样如此，有些扩展标准来完善。
 
@@ -78,8 +78,8 @@ Sitemap: https://www.example.com/sitemap.xml
 ### Robots Meta tag
 
 > 参考资料:
-> * [漫游器元标记、data-nosnippet 和 X-Robots-Tag 规范](https://developers.google.com/search/reference/robots_meta_tag)
-> * [Robots Metatags](https://www.bing.com/webmaster/help/which-robots-metatags-does-bing-support-5198d240)
+> [漫游器元标记、data-nosnippet 和 X-Robots-Tag 规范](https://developers.google.com/search/reference/robots_meta_tag)  
+> [Robots Metatags](https://www.bing.com/webmaster/help/which-robots-metatags-does-bing-support-5198d240)
 
 通过 `robots.txt` 可以允许或拒绝爬虫获取页面信息，但是仍然会将页面索引，同样会出现在搜索引擎中（但是页面内容不会）。可以通过 `<meta>` 标签，或者 `X-Robots-Tag` 响应头的方式，来避免页面被爬虫索引。
 
@@ -145,8 +145,8 @@ else:
 ## `robots.txt` 的局限性
 
 > 参考资料：
-> * [How to Detect and Verify Search Engine Crawlers](https://www.onely.com/blog/detect-verify-crawlers/)
-> * [验证 Googlebot](https://support.google.com/webmasters/answer/80553)
+> [How to Detect and Verify Search Engine Crawlers](https://www.onely.com/blog/detect-verify-crawlers/)  
+> [验证 Googlebot](https://support.google.com/webmasters/answer/80553)
 
 显然光靠一个 `.txt` 文本是无法真正阻止爬虫的，遵循 `robots.txt` 协议完全靠爬虫的“自觉”，因此还需要一些 “`.exe`” 的方式来阻止爬虫。
 
