@@ -12,7 +12,7 @@ tags:
 
 robots.txt（统一小写）是一种存放于网站根目录下的ASCII编码的文本文件，它通常告诉网络搜索引擎的漫游器（又称网络蜘蛛），此网站中的哪些内容是不应被搜索引擎的漫游器获取的，哪些是可以被漫游器获取的。因为一些系统中的URL是大小写敏感的，所以robots.txt的文件名应统一为小写。robots.txt应放置于网站的根目录下。如果想单独定义搜索引擎的漫游器访问子目录时的行为，那么可以将自定的设置合并到根目录下的robots.txt，或者使用robots元数据（Metadata，又称元数据）。
 
-**robots.txt协议并不是一个规范，而只是约定俗成的，所以并不能保证网站的隐私。**
+**robots.txt协议并不是一个规范，只是约定协议，并不能保护网站的隐私。**
 
 <!--more-->
 
@@ -37,9 +37,9 @@ Disallow: /disallow_uri_path
 > 参考资料:  
 > [Robots exclusion standard](https://en.wikipedia.org/wiki/Robots_exclusion_standard#Nonstandard_extensions)
 
-标准的 `robots.txt` 中 `User-agent` 虽然可以使用 `*` 表示所有爬虫，但是不支持通配符或正则（`*` 只是一个特定值），`Disallow` 同样如此，有些扩展标准来完善。
+标准的 `robots.txt` 中 `User-agent` 虽然可以使用 `*` 表示所有爬虫，但是不支持通配符或正则（`*` 只是一个特定值），`Disallow` 同样如此，扩展标准对这些不足进行了完善。
 
-**注意：扩展标准是否有效取决与爬虫是否支持扩展配置项目，以及各种的实际限制。**
+**注意：扩展标准是否有效取决于爬虫是否支持扩展配置项目，以及爬虫本身的限制。**
 
 #### `Crawl-delay`
 
@@ -52,7 +52,7 @@ Crawl-delay: 10
 
 #### `Allow`
 
-`Allow` 可以定义允许爬虫访问的路径、资源。配合 `Disallow` 可以实现更精准的控制。
+`Allow` 可以定义允许爬虫访问的路径、资源，配合 `Disallow` 可以实现更精准的控制。
 
 ```
 Allow: /disallow_uri_path/allow.html
@@ -77,7 +77,7 @@ Sitemap: https://www.example.com/sitemap.xml
 
 ### Robots Meta tag
 
-> 参考资料:
+> 参考资料:  
 > [漫游器元标记、data-nosnippet 和 X-Robots-Tag 规范](https://developers.google.com/search/reference/robots_meta_tag)  
 > [Robots Metatags](https://www.bing.com/webmaster/help/which-robots-metatags-does-bing-support-5198d240)
 
@@ -88,6 +88,8 @@ Sitemap: https://www.example.com/sitemap.xml
 ```html
 <meta name="robots" content="noindex">
 ```
+meta 标签可以针对页面进行设置，是否允许索引等。
+
 ##### `data-nosnippet` 属性
 
 针对页面元素的设置则需要使用 `data-nosnippet` 实现，支持在 `<span>` `<div>` `<section>` 块中定义。但是，获取 `data-nosnippet` 配置的前提是该页面允许爬虫访问。
@@ -108,7 +110,7 @@ Sitemap: https://www.example.com/sitemap.xml
 
 #### `X-Robots-Tag` 响应头
 
-通过在页面响应头中添加 `X-Robots-Tag` 可以达到一样效果。
+通过在页面响应头中添加 `X-Robots-Tag` 可以达到 meta 标签一样效果。
 
 ```
 X-Robots-Tag: noindex
@@ -164,7 +166,9 @@ if ($http_user_agent ~* (Baiduspider) ) {
 }
 ```
 
-由于 `User-Agent` 是可以被假冒的，因此需要对访问 IP 进行验证。可以通过分析 Web Server 的日志来整理使用了爬虫 `User-Agent` 的来源 IP，在通过 `host` 命令对 IP 进行验证，或者通过搜索引擎提供的验证工具进行验证，比如 [必应 Bing - 验证 Bingbot 工具](https://www.bing.com/toolbox/verify-bingbot)
+由于 `User-Agent` 是可以被假冒的，因此需要对访问 IP 进行验证。
+
+可以通过分析 Web Server 的日志来整理使用了爬虫 `User-Agent` 的来源 IP，在通过 `host` 命令对 IP 进行验证，或者通过搜索引擎提供的验证工具进行验证，比如 [必应 Bing - 验证 Bingbot 工具](https://www.bing.com/toolbox/verify-bingbot)
 
 在 Nginx 上则可以使用以下两种方式：
 
@@ -174,20 +178,18 @@ if ($http_user_agent ~* (Baiduspider) ) {
 
 Nginx HTTP rDNS module 是基于 Nginx module 的方式，通过验证声明为爬虫的 IP 反查 Host 判断，Nginx Ultimate Bad Bot 则是基于自动脚本，添加更新 Nginx 配置的方式，另外还支持基于防火墙层级的阻断。
 
-但是，仍然可以通过伪装为正常浏览器 `User-Agent` 的方式突破限制，对于这种方式的爬虫，只能选择基于行为去分析、限制，或者依赖前端反爬方案。
+但是，爬虫可以通过伪装为正常浏览器 `User-Agent` 的方式突破这些限制，对于这种方式的爬虫，只能选择基于行为去分析、限制，或者依赖前端反爬方案。
 
 ### 法律意义
 
-*注：以下内容为个人解读，不能代表专业看法或法律咨询。*
+*注：以下内容为个人解读，不代表专业分析或法律咨询。*
 
 从国内相关爬虫案例看，是否遵循 `robots.txt` 并非关键。
 
-以刑事相关计算机信息安全法规条款看，当涉及破解突破目标网站限制时（包括但不限于频率、权限等），风险水平会急剧提升。
-
-另外爬取、保存公民个人隐私数据也存在高风险，即便 `robots.txt` 并未 `Disallow`。如果提供这类爬虫与第三方使用，一旦牵扯到犯罪行为，开发者必然会被连带。
+爬取、保存公民个人隐私数据也存在极高风险，即便 `robots.txt` 并未 `Disallow`。开发这类爬虫获取这类信息，或者提供第三方使用，一旦牵扯到犯罪行为，开发者必然会被连带。
 
 另外，即便是遵循 `robots.txt`，爬取的也是公开数据，但是因为爬取行为造成目标主机故障的情况，也有被判定为网络攻击的风险，涉及刑事犯罪。
 
 当爬取内容涉及版权、商业信息时，情况则更复杂一些。
 
-因为有《中华人民共和国网络安全法》，当爬虫涉及到破解、逆向以突破限制时（验证码、权限等），很容易被认定为破坏网络安全。一旦使用这些版权、商业信息引起纠纷、诉讼，风险会急剧上升，最终结果如何取决于公司的能力。
+以刑事相关计算机信息安全法规条款看，当爬虫涉及到破解、逆向以突破目标网站限制时（包括但不限于频率、权限、验证码等）。一旦使用这些获取的版权、商业信息引起纠纷、诉讼，有被认定为破坏网络安全的风险存在，最终结果如何完全取决于公司的能力。
