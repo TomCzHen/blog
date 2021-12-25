@@ -127,14 +127,14 @@ CMD ["flask","run"]
 * 下载指定版本的代码归档文件构建。
 
 ```Dockerfile
+ARG app_version=1.0.0
 FROM python:3.7.3-slim
 ENV PIP_NO_CACHE_DIR=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     FLASK_APP="app"
-ARG version=1.0.0
 RUN apt-get update && apt-get install -yqq curl tar
 WORKDIR /app
-RUN curl -L https://github.com/example/flask-example/releases/download/${version/flask-example-${version}.tar.gz \
+RUN curl -L https://github.com/example/flask-example/releases/download/${app_version/flask-example-${app_version}.tar.gz \
     | tar xz -C /app --strip-components 1 \
     && pip install pipenv \
     && pipenv install --deploy --system
@@ -146,9 +146,9 @@ CMD ["flask","run"]
 多阶段构建仍然存在缓存，不过这里主要目的是保护私钥。
 
 ```Dockerfile
-FROM debian as builder
 ARG tag="1.0.0"
 ARG ssh_key=""
+FROM debian as builder
 RUN apt-get update && apt-get install -yqq git \
     && echo ${ssh_key} > ~/.ssh/id.rsa \
     && chmod 700 ~/.ssh/id_rsa \
@@ -328,6 +328,7 @@ CMD ["flask", "run"]
 
 ```Dockerfile
 ARG python_version="3.7.3"
+ARG uwsig_version="2.0.18"
 FROM python:${python_version}-slim as builder
 ENV PIP_NO_CACHE_DIR=1 \
     PYTHONDONTWRITEBYTECODE=1
@@ -338,7 +339,6 @@ RUN apt-get update && apt-get install -yqq gcc \
 
 COPY ["Pipfile","Pipfile.lock","/app/"]
 WORKDIR /app
-ARG uwsig_version="2.0.18"
 RUN mkdir .venv \
     && pipenv install --deploy \
     && pipenv install uwsgi==${uwsig_version} --skip-lock
@@ -413,6 +413,7 @@ main "$@"
 
 ```Dockerfile
 ARG python_version="3.7.3"
+ARG uwsig_version="2.0.18"
 FROM python:${python_version}-slim as builder
 ENV PIP_NO_CACHE_DIR=1 \
     PYTHONDONTWRITEBYTECODE=1
@@ -423,7 +424,6 @@ RUN apt update && apt install -yqq gcc \
 
 COPY ["Pipfile","Pipfile.lock","/app/"]
 WORKDIR /app
-ARG uwsig_version="2.0.18"
 RUN mkdir .venv \
     && pipenv install --deploy \
     && pipenv install uwsgi==${uwsig_version} --skip-lock
@@ -463,10 +463,9 @@ Web Server 选择基本就是 Nginx 了，但是本文使用 Caddy :doge:，考�
 
 ```Dockerfile
 # docker/caddy/Dockerfile
+ARG plugins="http.cache,http.cors,http.expires,http.realip,http.git"
 FROM alpine:latest as builder
 RUN apk add --no-cache curl bash gnupg
-
-ARG plugins="http.cache,http.cors,http.expires,http.realip,http.git"
 RUN curl https://getcaddy.com | bash -s personal ${plugins}
 
 FROM alpine:latest
