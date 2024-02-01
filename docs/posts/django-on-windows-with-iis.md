@@ -54,6 +54,9 @@ Django 官方文档中提供的生产部署方案并没有在 Windows 上部署�
 
 考虑到需要使用到 [Django Channels](https://channels.readthedocs.io/en/latest/){:target="_blank"} 所以只能选择 ASGI。 那么在 Windows 下可以选择的 ASGI Server 有 [Daphne](https://github.com/django/daphne){:target="_blank"} 、 [Hypercorn](https://pgjones.gitlab.io/hypercorn/){:target="_blank"} 和 [Uvicorn](https://www.uvicorn.org/){:target="_blank"}
 
+!!! note
+
+    如果只需要 wsgi 方式的话，可以使用 [Waitress](https://docs.pylonsproject.org/projects/waitress/en/stable/index.html){:target="_blank"}，但是需要注意，waitress 默认是开启 4 个线程，因此需要确保代码是线程安全，或者干脆设置 `threads` 为 1。
 
 ## 站点配置
 
