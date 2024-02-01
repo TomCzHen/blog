@@ -1,0 +1,66 @@
+site_name: "Tom CzHen's Blog"
+
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - header.autohide
+    - announce.dismiss
+    - content.code.copy
+
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
+  - attr_list
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+plugins:
+  #  - optimize
+  - blog:
+      blog_dir: .
+      post_date_format: medium
+      post_url_date_format: yyyy/MM/dd
+      post_url_format: "{date}/{file}"
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/TomCzHen
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
+
+
+copyright: Copyright &copy; 2014 - 2024 Tom CzHen • <a target="_blank" href="http://www.beian.miit.gov.cn/">鄂ICP备15001586号</a>
